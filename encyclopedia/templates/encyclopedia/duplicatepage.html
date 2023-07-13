@@ -1,0 +1,14 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Duplicate Page
+{% endblock %}
+
+{% block body %}
+    
+
+    <h1>Error...This page already exist!!!</h1>
+
+    <a href="{% url 'encyclopedia:addNew' %}">Try Again</a>
+
+{% endblock %}
