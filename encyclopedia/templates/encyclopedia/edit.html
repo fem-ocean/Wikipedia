@@ -10,11 +10,19 @@
     
     <form action="{% url 'encyclopedia:saveEdit' %}" method="post">
         {% csrf_token %}
-        <input hidden id="title" name="title" value="{{ title|safe }}"/>
-        <label for="content">Content:</label>
-        <textarea id="content" name="content">{{singleResult}}</textarea>
+        <div>
+            <label for="title">Title:</label>
+            <input id="title" name="title" value="{{ title|safe }}"/>
+        </div>
+
+        <div><label for="content">Content:</label></div>
+        <div>
+            <textarea id="content" name="content">{{singleResult}}</textarea>
+        </div>
         
-        <input type="submit" value="Save"/>
+        <div style="margin: auto;">
+            <input type="submit" value="Save"/>
+        </div>
     </form>
     
 

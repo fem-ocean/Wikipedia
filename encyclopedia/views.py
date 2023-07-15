@@ -3,8 +3,9 @@ import re
 from django import forms
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-
+import random
 from . import util
+from . import markdown2
 
 
 class AddNewEntry(forms.Form):
@@ -12,11 +13,14 @@ class AddNewEntry(forms.Form):
     newEntryContent = forms.CharField(label="Content", widget=forms.Textarea)
 
 
+#index page
 def index(request):
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries()
     })
 
+
+#Search bar
 def searchResult(request):
 
     #get the value of the search input query
@@ -25,15 +29,13 @@ def searchResult(request):
     #call the util function on the value of d input query and store in variable x
     x = util.get_entry(q)
 
+    #Show entries that dont exactly match but similar to the searched entry
     if x == None:
             entries = util.list_entries()
             matches = []
 
-            print(f'{q}')
-
             for entry in entries:
                 if re.search(rf'{q}',entry, re.IGNORECASE):
-                    print(entry)
                     matches.append(entry)
 
             return render(request, "encyclopedia/index.html", {
@@ -42,24 +44,25 @@ def searchResult(request):
 
     else:
         return render(request, "encyclopedia/content.html", {
-            "singleResult":util.get_entry(q),
+            "singleResult":markdown2.markdown(util.get_entry(q)),
             "title": q
         })
 
 
+#Show content of entry. If none is found, show an error page.
 def showPage(request, title):
-    # request.session['title'] = title
     x = util.get_entry(title)
 
     if x == None:
         return render(request, "encyclopedia/error.html")
     else:
         return render(request, "encyclopedia/content.html", {
-            "singleResult":util.get_entry(title),
+            "singleResult":markdown2.markdown(util.get_entry(title)),
             "title": title
         })
     
 
+#Add new page. If entry already exist, show an error
 def addNew(request):
     if request.method == "POST":
         form = AddNewEntry(request.POST)
@@ -72,7 +75,7 @@ def addNew(request):
             else:
                 util.save_entry(title, content)
                 return render(request, "encyclopedia/content.html", {
-                    "singleResult":util.get_entry(title),
+                    "singleResult":markdown2.markdown(util.get_entry(title)),
                     "title": title
                 })
         else:
@@ -85,37 +88,39 @@ def addNew(request):
     })
 
 
+#Edit the content of an entry
 def edit(request, title):
-    # title = request.session.get('title')
-    # singleResult = util.get_entry(title)
-
-    # form = AddNewEntry({'newEntryTitle': title, 'newEntryContent': singleResult})
-
-    # return render(request, "encyclopedia/edit.html", {
-    #     "form": form
-    
     entryForEdit = util.get_entry(title)
-
-    title = "Python"
-    singleResult = "page content"
 
     return render(request, "encyclopedia/edit.html", {
         "title": title,
-        "singleResult": singleResult
+        "singleResult": entryForEdit
     })
 
 
+#Function to save the edited entry and render
 def saveEdit(request):
-
-
     if request.method == "POST":
         content = request.POST.get('content')
         title = request.POST.get('title')
 
         util.save_entry(title, content)
         return render(request, "encyclopedia/content.html", {
-            "singleResult":util.get_entry(title),
+            "singleResult":markdown2.markdown(util.get_entry(title)),
             "title": title
         })
+
+
+#Random function for displaying an entry    
+def findRandom(request):
+    allEntries = util.list_entries()
+    print(allEntries)
+    randomEntry = random.choice(allEntries)
+    content = markdown2.markdown(util.get_entry(randomEntry))
+
+    return render(request, "encyclopedia/content.html", {
+        "singleResult": content,
+        "title": randomEntry
+    })
     
     

@@ -5,10 +5,9 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{title}}</h1>
 
-    {{singleResult}}
+    {{singleResult|safe}}
 
-    <a href="{% url 'encyclopedia:edit' %}">Edit Page</a>
+    <a href="{% url 'encyclopedia:edit' title %}">Edit Page</a>
 
 {% endblock %}
